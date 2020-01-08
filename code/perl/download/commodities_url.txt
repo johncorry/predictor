@@ -19,5 +19,3 @@ Iron ore is only recorded monthly.
 
 2/7/2016
 Oil (CME_CL1) seems to be good and produced daily. See API above.
-
-This is a test edit.
