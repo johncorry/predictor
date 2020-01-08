@@ -1,0 +1,21 @@
+https://www.quandl.com/api/v3/datasets/LBMA/GOLD.csv
+
+Iron Ore
+https://www.quandl.com/api/v3/datasets/ODA/PIORECR_USD.csv
+
+Copper
+https://www.quandl.com/api/v3/datasets/LME/PR_CU.csv
+
+Silver
+https://www.quandl.com/api/v3/datasets/LBMA/SILVER.csv
+
+Oil
+https://www.quandl.com/api/v3/datasets/CHRIS/CME_CL1.csv?start_date=1970-01-01&end_date=1970-01-01
+https://www.quandl.com/data/CHRIS/CME_CL1
+
+https://www.quandl.com/api/v3/datasets/WGC/GOLD_DAILY_AUD.csv?transform=diff&start_date=2008-08-27
+https://www.quandl.com/api/v3/datasets/CHRIS/CME_CL1.csv?start_date=2008-05-03
+Iron ore is only recorded monthly.
+
+2/7/2016 
+Oil (CME_CL1) seems to be good and produced daily. See API above.
