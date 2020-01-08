@@ -17,5 +17,7 @@ https://www.quandl.com/api/v3/datasets/WGC/GOLD_DAILY_AUD.csv?transform=diff&sta
 https://www.quandl.com/api/v3/datasets/CHRIS/CME_CL1.csv?start_date=2008-05-03
 Iron ore is only recorded monthly.
 
-2/7/2016 
+2/7/2016
 Oil (CME_CL1) seems to be good and produced daily. See API above.
+
+This is a test edit.
