@@ -22,7 +22,7 @@ my $counter = 0;
 foreach my $code (@$codes_arr_ref) {
   print "Result Counter : $code $counter\n";
 
-  my $cmd = "/home/ubuntu/code/perl/predict/modelC/searchPredict.pl -s -c " . $code . " > /dev/null 2>&1";
+  my $cmd = "/home/ec2-user/git-checkout/code/perl/predict/modelC/searchPredict.pl -s -c " . $code . " > /dev/null 2>&1";
   #print $cmd . "\n";
   system ($cmd);
   print "Result " . localtime . "\n";

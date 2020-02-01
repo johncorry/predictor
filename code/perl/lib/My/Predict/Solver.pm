@@ -22,7 +22,7 @@ sub new
    };
    
    # Model Cache
-   $self->{_model} = "/home/ubuntu/models/" . $self->{_problem}->getCode . ".model";
+   $self->{_model} = "/home/ec2-user/models/" . $self->{_problem}->getCode . ".model";
 
    bless $self, $class;
    return $self;
