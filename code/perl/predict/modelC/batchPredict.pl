@@ -14,7 +14,7 @@ print "\nResult Today is " . gmtime() . "\n";
 my $startLogTime = localtime; # scalar context
 print "\nResult Executing at $startLogTime\n\n";
 
-my $MAX_PROCESSES = 4;
+my $MAX_PROCESSES = 8;
 my $ASX200Data = new ASX200Data();
 
 my $codes_arr_ref = $ASX200Data->getCodes();

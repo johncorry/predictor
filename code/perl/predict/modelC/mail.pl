@@ -63,7 +63,18 @@ for my $portfolioCode (@portfolio){
    $sth2->execute()
      or die "Can't execute SQL statement: $DBI::errstr\n";
    #print $portfolioCode . "\n";
+   
+   my $sth3 = $dbh->prepare("SELECT * FROM PriceData.ASX200Company WHERE code = ?");
+
+   $sth3->execute($portfolioCode);
+
+   my @rowName = $sth3->fetchrow_array();
+   my $name = $rowName[1];
+   my $sector = $rowName[2];
+ 
    $portfolioSetHTML = $portfolioSetHTML . "<div><h2><a href=\"http://finance.yahoo.com/q/pr?s=$portfolioCode.AX+Profile\">$portfolioCode</a></h2>\n";
+   $portfolioSetHTML = $portfolioSetHTML . "$name";
+   $portfolioSetHTML = $portfolioSetHTML . "<p>$sector</p>";
 
    $portfolioSetHTML = $portfolioSetHTML . qq{ 
       <p>
@@ -187,8 +198,18 @@ while (my @row = $sth->fetchrow_array()){
   $sth2->execute()
      or die "Can't execute SQL statement: $DBI::errstr\n";
   #print $code . "\n";
+
+  my $sth3 = $dbh->prepare("SELECT * FROM PriceData.ASX200Company WHERE code = ?");
+
+  $sth3->execute($code);
+
+  my @rowName = $sth3->fetchrow_array();
+  my $name = $rowName[1];
+  my $sector = $rowName[2];
  
   $predictionSetHTML = $predictionSetHTML . "<div><h2><a href=\"http://finance.yahoo.com/q/pr?s=$code.AX+Profile\">$code</a></h2>\n";
+  $predictionSetHTML = $predictionSetHTML . "$name";
+  $predictionSetHTML = $predictionSetHTML . "<p>$sector</p>";
   $predictionSetHTML = $predictionSetHTML . qq{ 
       <p>
           <img border="0" alt="$code" src="https://www.reuters.wallst.com/reuters/enhancements/chartapi/chart_api.asp?width=640&height=350&duration=20&showLastClose=1&headerType=quote&lowers=volume&symbol=$code.AX" width="640" height="350">
