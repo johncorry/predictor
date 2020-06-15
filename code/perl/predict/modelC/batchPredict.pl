@@ -19,7 +19,7 @@ my $ASX200Data = new ASX200Data();
 
 my $codes_arr_ref = $ASX200Data->getCodes();
 my $counter = 0;
-  
+
 my $pm = new Parallel::ForkManager($MAX_PROCESSES);
 
 foreach my $code (@$codes_arr_ref) {
