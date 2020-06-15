@@ -19,6 +19,7 @@ sub new
       _code               => shift,
       _forecastPeriod     => shift,
       _timeMachine        => shift,
+      _forcePrediction    => shift // 0,
       _numTests           => 40,
       _upperThreshold     => 0.01,
       _lowerThreshold     => -0.01,
@@ -53,7 +54,7 @@ sub new
       print "Result removing : $shifted\n";
    }
    ####
-   
+
 
    $self->{_numSamples} = scalar (@{$self->{_dateSeries}});
    $self->{_finalDate} = $self->{_dateSeries}->[$self->{_numSamples} -1];
@@ -61,7 +62,7 @@ sub new
    $self->{_ASXIndicesData} = new ASXIndicesData();
    $self->{_FXAUDMap} = My::Predict::DataLookUp::create_FXAUD_Look_Up();
    print "Result creating daily ETF look up\n";
-   # Bug: If there are problems with the map, missing data in this case then 
+   # Bug: If there are problems with the map, missing data in this case then
    #      things down strem of this can't handle it.
    $self->{_ETFMap} = My::Predict::DataLookUp::create_Daily_ETF_Look_Up();
    print "Result done creating daily ETF look up\n";
@@ -119,7 +120,7 @@ sub getSolution {
          #   $stake = $stake + ($stake * $self->getGainOverPeriod($start_date, $forecast_date));
          #}
 
-         
+
          my $reality = $self->getReality($start_date, $forecast_date);
 
          if ($reality == 1){
@@ -128,15 +129,15 @@ sub getSolution {
 
          push @result, sprintf ("Result %s\t% .3f\t% .3f\t% d\t% d\t% d\t% .3f\t% .3f\t% .3f\n",
                                  $start_date,
-                                 $self->getClosingPrice($start_date), 
+                                 $self->getClosingPrice($start_date),
                                  $self->getGainOverPeriod($start_date, $next_date),
                                  $own,
                                  $prediction,
                                  $reality,
                                  $self->getGainOverPeriod($start_date, $forecast_date),
                                  $bestGain,
-                                 $stake); 
-                                 
+                                 $stake);
+
       }
       else {
          push @result, sprintf ("Result %s\t% .3f\t% .3f\t% d\t% d\t -\t -\t -\t -\n",
@@ -154,7 +155,7 @@ sub getSolution {
    for my $r (@result){
       print $r;
    }
-   
+
 
    return ($finalPrediction, $bestGain, $sitAndHoldGain, $stake, $self->{_accuracy}, @result);
 }
@@ -227,8 +228,8 @@ sub getClosingPrice {
 sub setTestSolution {
    my ( $self, @testSetSolution ) = @_;
 
-   foreach my $i (($self->getNumDataSets() - $self->getNumTests())..($self->getNumDataSets() - $self->getForecastPeriod())) { 
-      my $date = $self->{_dateSeries}[$i]; 
+   foreach my $i (($self->getNumDataSets() - $self->getNumTests())..($self->getNumDataSets() - $self->getForecastPeriod())) {
+      my $date = $self->{_dateSeries}[$i];
       my $prediction = shift @testSetSolution;
       $self->setPrediction($date,$prediction);
    }
@@ -246,7 +247,7 @@ sub setPredictionSolution {
 
 sub setPrediction {
    my ( $self, $date, $prediction) = @_;
-   $self->{_predictionMap}->{$date} = $prediction; 
+   $self->{_predictionMap}->{$date} = $prediction;
 }
 
 sub getPrediction {
@@ -256,7 +257,7 @@ sub getPrediction {
 
 sub getReality {
    my ( $self, $start_date, $end_date) = @_;
-   
+
    my $reality = 0;
 
    if ($self->getGainOverPeriod($start_date, $end_date) >= $self->getUpperThreshold()){
@@ -369,16 +370,22 @@ sub getIncludeTimeSeries {
 sub canPredict {
    my ( $self ) = @_;
 
+   # If the user sets a flag then force the prediction.
+
+   if ($self->{_forcePrediction}){
+     return 1;
+   }
+
    # Check that a number of basic prerequisites are met otherwise the prediction will be rubbish.
 
    if ($self->{_numSamples} < $self->{_minSamples}){
       print "Result $self->{_numSamples} is less than $self->{_minSamples} which is the minimum number of samples.\n";
       print "Result Cannot predict.\n";
-      return 0;     
+      return 0;
    }
 
    my $closing_price = $self->{_priceMap}->{$self->{_finalDate}}->getClose();
- 
+
    if ($closing_price < $self->{_minClosingPrice}){
       print "Result $closing_price is less than $self->{_minClosingPrice} which is the minimum closing price.\n";
       print "Result Cannot predict.\n";
@@ -390,23 +397,23 @@ sub canPredict {
 
    for (my $i = 1; $i < $self->{_numTests} -1 ; $i++){
 
-      my $volume = $self->{_priceMap}->{${$self->{_dateSeries}}[-$i]}->getVolume();       
-      my $closingPrice = $self->{_priceMap}->{${$self->{_dateSeries}}[-$i]}->getClose(); 
+      my $volume = $self->{_priceMap}->{${$self->{_dateSeries}}[-$i]}->getVolume();
+      my $closingPrice = $self->{_priceMap}->{${$self->{_dateSeries}}[-$i]}->getClose();
       my $prevClosingPrice = $self->{_priceMap}->{${$self->{_dateSeries}}[-($i+1)]}->getClose();
       $accumulatedAbsChange = $accumulatedAbsChange + abs($closingPrice - $prevClosingPrice);
       $accumulatedVolume = $accumulatedVolume + ($volume * $closingPrice);
    }
 
    if ($accumulatedAbsChange == 0) {
-      # A better test here would be some sort of standard diviation. 
+      # A better test here would be some sort of standard diviation.
       print "Result Accumulated absolute change is $acculatedAbsChange.\n";
       print "Result Cannot predict.\n";
       return 0;
-   } 
- 
+   }
+
    my $averageVolume = $accumulatedVolume/$self->{_numTests};
    my $minmumDailyVol = 100000;
-   
+
    if ($averageVolume  < $minmumDailyVol) {
       print "Result Average daily volume is $averageVolume is less than $minmumDailyVol.\n";
       print "Result Cannot predict.\n";
@@ -425,7 +432,7 @@ sub getSector {
 sub createProblem {
    my ( $self ) = @_;
 
-   my $problemPDL = pdl [];   
+   my $problemPDL = pdl [];
 
    if ($self->canPredict){
 
@@ -444,7 +451,7 @@ sub createProblem {
             $problemFeaturePDL = $problemPDL->glue(1,$indexFeaturePDL);
          }
       }
-     
+
       if($self->{_includeFX}){
          print "Result Including FX.\n";
          my $fxPDL = $self->createFXPDL;
@@ -542,7 +549,7 @@ sub getPredictionSet {
 
 sub createTargetGainPDL {
    my ( $self ) = @_;
-  
+
    my @close = ();
 
    for my $date_key (@{$self->{_dateSeries}}) {
@@ -557,7 +564,7 @@ sub createTargetGainPDL {
    my $zeros = zeros($self->{_forecastPeriod});
    $shifted_close_pdl = $shifted_close_pdl->append($zeros);
    $shifted_close_pdl = $shifted_close_pdl($self->{_forecastPeriod}:$shifted_close_pdl->nelem-1);
-   #print "Result shifted_close_pdl : " . $shifted_close_pdl . "\n"; 
+   #print "Result shifted_close_pdl : " . $shifted_close_pdl . "\n";
 
    my $target_gain_pdl = ($shifted_close_pdl - $close_pdl)/$close_pdl;
    #print "Result target_gain_pdl   : " . $target_gain_pdl . "\n";
@@ -617,7 +624,7 @@ sub createFeaturePDL {
       my $freqSeriesPDL = $self->createFreqSeriesPDL($$pricePDLSet_ref->getScaledClosePDL(), $self->{_freqSeries});
       $dataPDL = $dataPDL->glue(1,$freqSeriesPDL);
    }
- 
+
    my $mfiPDL = ta_mfi($$pricePDLSet_ref->getScaledHighPDL,
                        $$pricePDLSet_ref->getScaledLowPDL,
                        $$pricePDLSet_ref->getScaledClosePDL,
@@ -698,8 +705,8 @@ sub createFreqSeriesPDL {
   my ($self, $pdl_ref, $timePeriod) = @_;
 
   #print "createFreqSeriesPDL\n";
-  #print $pdl_ref . "\n"; 
-  
+  #print $pdl_ref . "\n";
+
   my $tempPDL = zeros($timePeriod);
   $tempPDL = $tempPDL->append($pdl_ref);
 
@@ -715,7 +722,7 @@ sub createFreqSeriesPDL {
   #print "Dims " . @dims . " : " . $dims[0] . " " . $dims[1] . "\n";
 
   my $scaledTimeSeriesPDL = pdl [];
- 
+
   foreach (0 .. $timeSeriesPDL->getdim(1)-1){
 
     my $singleTimeSeriesPDL = $timeSeriesPDL(:,$_);
@@ -725,7 +732,7 @@ sub createFreqSeriesPDL {
 
     # FIXME This is returning -ve frequencies. Is this valid?
     fftnd $singleTimeSeriesPDL, $imagPDL;
- 
+
     my $max = max($singleTimeSeriesPDL);
     $self->scale (\$singleTimeSeriesPDL,$max);
     #print "Freq : \n" . $singleTimeSeriesPDL . "\n";
@@ -793,7 +800,7 @@ sub createFXPDL {
 
   }
   #print $data_pdl;
-  #exit; 
+  #exit;
 
   return $data_pdl;
 }
@@ -853,7 +860,7 @@ sub createETFsPDL {
 
   }
   #print $data_pdl;
-  #exit; 
+  #exit;
 
   return $data_pdl;
 }
@@ -907,7 +914,7 @@ sub pdl_roc {
      my $pdl = ta_roc($pdl_ref, $sample_period);
      # Need to scale the answer as the ROC can be far greater than 1.
      my $max = max($pdl);
-     #FIXME Why doesn't this work? 
+     #FIXME Why doesn't this work?
      #$self->scale(\$pdl,$max);
      $pdl = $pdl/$max;
      #####
@@ -962,34 +969,34 @@ sub getHigh {
    my ( $self, $date ) = @_;
 
    return $self->{_priceMap}->{$date}->getHigh();
-   
+
 }
 
 sub getLow {
    my ( $self, $date ) = @_;
 
    return $self->{_priceMap}->{$date}->getLow();
-   
+
 }
 
 sub getClose {
    my ( $self, $date ) = @_;
 
    return $self->{_priceMap}->{$date}->getClose();
-   
+
 }
 
 sub getVolume {
    my ( $self, $date ) = @_;
 
    return $self->{_priceMap}->{$date}->getVolume();
-   
+
 }
 
 sub getAdjClose {
    my ( $self, $date ) = @_;
 
    return $self->{_priceMap}->{$date}->getAdjClose();
-   
+
 }
 1;

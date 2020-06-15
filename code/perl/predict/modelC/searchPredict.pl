@@ -18,27 +18,29 @@ my $code = 'QAN';
 my $forecastPeriod = 20;
 my $timeMachine = 0;
 my $print = 0;
+my $forcePredict = 0;
 my $save = 0;
 
 my @upperThresholdValues = (0.02,0.05,0.10);
 my @lowerThresholdValues = (-0.01,-0.02);
-my @includeIndexValues = (1); 
-my @includeETFsValues = (1); 
+my @includeIndexValues = (1);
+my @includeETFsValues = (1);
 my @includeFXValues = (1);
 my @includeDaysMonthsValues = (1);
 my @includeTimeSeriesValues = (1);
 my @includeFrequenciesValues = (1);
 
 my $result = GetOptions ("c=s"  => \$code,
-                         "f=i"  => \$forecastPeriod,
+                         "fp=i" => \$forecastPeriod,
                          "tm=i" => \$timeMachine,
                          "p"    => \$print,
+                         "f"    => \$forcePredict,
                          "s"    => \$save
 );
 
 
 print "Result Creating problem...\n";
-my $problem = new Problem($code,$forecastPeriod,$timeMachine);
+my $problem = new Problem($code,$forecastPeriod,$timeMachine,$forcePredict);
 print "Result Creating solver...\n";
 my $solver = new Solver($problem);
 my $bestPredictedGain = 0;
@@ -51,7 +53,7 @@ print "Result Searching....\n";
    foreach my $lowerThreshold (@lowerThresholdValues){
    foreach my $includeIndex (@includeIndexValues){
    foreach my $includeFX (@includeFXValues){
-   foreach my $includeETFs (@includeETFsValues){   
+   foreach my $includeETFs (@includeETFsValues){
    foreach my $includeDaysMonths (@includeDaysMonthsValues){
    foreach my $includeTimeSeries (@includeTimeSeriesValues){
    foreach my $includeFrequencies (@includeFrequenciesValues){
@@ -60,7 +62,7 @@ print "Result Searching....\n";
       $problem->setLowerThreshold($lowerThreshold);
       $problem->includeIndex($includeIndex);
       $problem->includeETFs($includeETFs);
-      $problem->includeFX($includeFX); 
+      $problem->includeFX($includeFX);
       $problem->includeDaysMonths($includeDaysMonths);
       $problem->includeTimeSeries($includeTimeSeries);
       $problem->includeFrequencies($includeFrequencies);
@@ -96,4 +98,3 @@ my $endLogTime = localtime; # scalar context
 my $runTime = $endLogTime - $startLogTime;
 print "\nCompleted at $endLogTime\n";
 print "Result Runtime $runTime\n";
-

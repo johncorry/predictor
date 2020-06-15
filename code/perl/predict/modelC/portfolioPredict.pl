@@ -33,11 +33,11 @@ while (@row = $sth->fetchrow_array()){
   my $code = $row[0];
   print "Result Counter : $code $counter\n";
 
-  my $cmd = "/home/ec2-user/git-checkout/code/perl/predict/modelC/searchPredict.pl -s -c " . $code . " > /dev/null 2>&1";
+  my $cmd = "/home/ec2-user/git-checkout/code/perl/predict/modelC/searchPredict.pl -s -c -f " . $code . " > /dev/null 2>&1";
   #print $cmd . "\n";
   system ($cmd);
   print "Result " . localtime . "\n";
-  
+
   $counter++;
 
   #if ($counter > 30) {
@@ -52,5 +52,3 @@ my $endLogTime = localtime; # scalar context
 my $runTime = $endLogTime - $startLogTime;
 print "\nCompleted at $endLogTime\n";
 print "Result Runtime $runTime\n";
-
-
