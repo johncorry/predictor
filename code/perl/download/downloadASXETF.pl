@@ -32,20 +32,20 @@ $sth->finish();
 #$start_date->parse("14 days ago");
 #$end_date->parse("Today");
 
-#  
+#
 # OOO.ax  - Oil
-# RCB.ax  - Bonds 
+# RCB.ax  - Bonds
 # BNKS.ax - Global banks
 # QCB.ax  - Broad commodities
 # QAG.ax  - Agriculture
-# QAU.ax  - Gold 
+# QAU.ax  - Gold
 # QOZ.ax  - FTSE RAFI Australia 200
 # QFN.ax  - Financials
 # QPON.ax - Australia Banking Senior Floating Rate Bond
 # QUAL.ax - MSCI World ex Australia Quality Index
 # QUS.ax  - FTSE RAFI US 1000
 # TECH.ax - Global tech
-# YANK.ax 
+# YANK.ax
 # FOOD.ax
 # NDQ.ax  - NASDAQ
 # ^AXVI Only seems to be available for a day.
@@ -56,14 +56,14 @@ for (my $i = 4; $i >= 1; $i--) {
    my $start = $i * 7 - 1;
    my $end = $start - 6;
    print "$start...$end\n";                # Countdown
-        
+
    my $q = Finance::QuoteHist->new
       (
-         symbols    => [qw( ^AXVI.ax OOO.ax RCB.ax BNKS.ax QCB.ax QAG.ax QAU.ax QOZ.ax QFN.ax QPON.ax QUAL.ax QUS.ax TECH.ax YANK.ax FOOD.ax NDQ.ax )],
+         symbols    => [qw( ^AXVI OOO.ax RCB.ax BNKS.ax QCB.ax QAG.ax QAU.ax QOZ.ax QFN.ax QPON.ax QUAL.ax QUS.ax TECH.ax YANK.ax FOOD.ax NDQ.ax )],
          start_date => "$start days ago", # or '1 year ago', see Date::Manip
          end_date   => "$end days ago",
       );
- 
+
    # Quotes
    foreach my $row ($q->quotes()) {
      (my $code, my $date, my $open, my $high, my $low, my $close, my $volume) = @$row;
@@ -74,8 +74,8 @@ for (my $i = 4; $i >= 1; $i--) {
      print "Inserting data for ". $date . " " . $code . " " . $close . "\n";
 
      my $sth2 = $dbh->prepare("INSERT INTO PriceData.ASXETF
-                              (Date,Code,Open,High,Low,Close,Volume) 
-                              values 
+                              (Date,Code,Open,High,Low,Close,Volume)
+                              values
                               ('$date',
                                '$code',
                                '$open',
@@ -92,4 +92,3 @@ for (my $i = 4; $i >= 1; $i--) {
 $dbh->disconnect();
 $logtime = localtime; # scalar context
 print "\nCompleted at $logtime\n";
-
