@@ -22,14 +22,15 @@ print "$date_str\n";
 my $ETFLookUp_ref = My::Predict::DataLookUp::create_Daily_ETF_Look_Up();
 
 my @ETFs = ("OOO",   # Oil
-            "QAG",   # Agriculture 
+            "QAG",   # Agriculture
             "QCB",   # Broad commodities
             "RCB",   # Bonds
             "QAU",   # Gold
             "QFN",   # Financials
             "QOZ",   # FTSE RAFI Aust 200
             "QUAL",  # MSCI World ex Australian Quality Index
-            "NDQ"    # NASDAQ
+            "NDQ",   # NASDAQ
+            "^AXVI"  # AVIX
 );
 
 print "Printing ETFs\n";
@@ -79,4 +80,3 @@ my $endLogTime = localtime; # scalar context
 my $runTime = $endLogTime - $startLogTime;
 print "\nCompleted at $endLogTime\n";
 print "Result Runtime $runTime\n";
-

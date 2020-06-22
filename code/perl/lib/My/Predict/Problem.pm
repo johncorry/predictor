@@ -810,7 +810,7 @@ sub createETFsPDL {
   my ( $self ) = @_;
 
   my @time_frames = (2,5,10,20,50,100,200);
-  my @ETFs = ("OOO","QAG","QCB","RCB","QAU","QFN","QOZ","QUAL","NDQ");
+  my @ETFs = ("OOO","QAG","QCB","RCB","QAU","QFN","QOZ","QUAL","NDQ","^AXVI");
   #my @ETFs = ("GOLD","QCB","OOO","IAA","IVV","IOO","IXI","IAF","VLC");
   my $data_pdl = pdl[];
 
