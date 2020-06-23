@@ -3,17 +3,18 @@
 use strict;
 use warnings;
  
-my $filename = '2010-2013.csv';
+my $filename = 'AXVIJ.csv';
 open(my $fh, '<:encoding(UTF-8)', $filename)
   or die "Could not open file '$filename' $!";
  
 my $count = 0;
 
-my $content = <$fh>;
-my @rows = split(/\r/,$content);
+while (<$fh>){
 
-foreach (@rows)
-{
-  print "$_\n";
+   my $content = $_;
+   my @rows = split(/,/,$content);
+   print " --> $rows[0] $rows[1]\n";
 }
+
+close ($fh);
 

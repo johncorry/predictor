@@ -21,24 +21,13 @@ print "$date_str\n";
 
 my $ETFLookUp_ref = My::Predict::DataLookUp::create_Daily_ETF_Look_Up();
 
-my @ETFs = ("OOO",   # Oil
-            "QAG",   # Agriculture
-            "QCB",   # Broad commodities
-            "RCB",   # Bonds
-            "QAU",   # Gold
-            "QFN",   # Financials
-            "QOZ",   # FTSE RAFI Aust 200
-            "QUAL",  # MSCI World ex Australian Quality Index
-            "NDQ",   # NASDAQ
-            "^AXVI"  # AVIX
-);
-
 print "Printing ETFs\n";
 
-foreach my $ETF (@ETFs)
-{
-   print "\t$ETF\t" . $$ETFLookUp_ref{$date_str}->{$ETF} . "\n";
+for ( keys $$ETFLookUp_ref{$date_str}){
+   print "\t$_\t" . $$ETFLookUp_ref{$date_str}->{$_} . "\n";
 }
+
+#print "$_\n" for keys $$ETFLookUp_ref{$date_str};
 
 print "Done printing ETFs\n\n";
 
@@ -63,7 +52,7 @@ my @currencies = ("USD","TWI","CNY","JPY","EUR","GBP","BTC");
 
 foreach my $currency (@currencies)
 {
-   print "\t$currency\t" . $$CurrencyLookUp_ref{$date_str}->{$currency} . "\n";
+   printf ("\t%s\t%.2f\n", $currency, $$CurrencyLookUp_ref{$date_str}->{$currency}); 
 }
 
 print "Done printing FX\n\n";
@@ -72,7 +61,7 @@ print "Printing BTC\n";
 
 my $BTCLookUp_ref = My::Predict::DataLookUp::create_BTCAUD_Look_Up();
 
-print "\tBTC\t" . $$BTCLookUp_ref{$date_str} . "\n";
+printf ("\tBTC\t%.2f\n", $$BTCLookUp_ref{$date_str});
 
 print "Done printing BTC\n\n";
 
