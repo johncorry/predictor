@@ -29,14 +29,15 @@ sub create_Daily_ETF_Look_Up{
    my $lastDate;
 
    my @codes = ("OOO",   # Oil
-                "QAG",   # Agriculture 
+                "QAG",   # Agriculture
                 "QCB",   # Broad commodities
                 "RCB",   # Bonds
                 "QAU",   # Gold
                 "QFN",   # Financials
                 "QOZ",   # FTSE RAFI Aust 200
                 "QUAL",  # MSCI World ex Australian Quality Index
-                "NDQ"    # NASDAQ
+                "NDQ",   # NASDAQ
+                "^AXVI"  # AVIX
                );
 
 
@@ -57,7 +58,7 @@ sub create_Daily_ETF_Look_Up{
 
          my $dateKey =  $datetime->strftime("%Y-%m-%d");
 
-         #print $dateKey ." -> " . $Price . "\n"; 
+         #print $dateKey ." -> " . $Price . "\n";
          if ((!defined $lastDate) or (($datetime - $lastDate)/ONE_DAY) == 1) {
             $ETFLookUp_ref->{$dateKey}->{$code} = $Price;
             $lastDate = $datetime;
@@ -103,7 +104,7 @@ sub create_Daily_Commodity_Look_Up{
    my $CommodityLookUp_ref = {};
    my $lastDate;
 
-   my $CurrencyLookUp_ref = create_FXAUD_Look_Up(); 
+   my $CurrencyLookUp_ref = create_FXAUD_Look_Up();
 
    foreach my $row(@$Commodity_ref) {
       my ($Date, $Value) = @$row;
@@ -112,13 +113,13 @@ sub create_Daily_Commodity_Look_Up{
                                            "%Y-%m-%d %H:%M:%S");
 
       my $dateKey =  $datetime->strftime("%Y-%m-%d");
-   
-      # Need to convert to AUD but there maybe more Oil data than 
+
+      # Need to convert to AUD but there maybe more Oil data than
       # FX data so check.
       if (defined $$CurrencyLookUp_ref{$dateKey}->{USD}){
          $Value = $Value / $$CurrencyLookUp_ref{$dateKey}->{USD};
 
-         #print $dateKey ." -> " . $Value . "\n"; 
+         #print $dateKey ." -> " . $Value . "\n";
          if ((!defined $lastDate) or (($datetime - $lastDate)/ONE_DAY) == 1) {
             $CommodityLookUp_ref->{$dateKey}->{Oil} = $Value;
             $lastDate = $datetime;
@@ -152,7 +153,7 @@ sub create_Daily_Commodity_Look_Up{
 
       my $dateKey =  $datetime->strftime("%Y-%m-%d");
 
-      #print $dateKey ." -> " . $Price . "\n"; 
+      #print $dateKey ." -> " . $Price . "\n";
       if ((!defined $lastDate) or (($datetime - $lastDate)/ONE_DAY) == 1) {
          $CommodityLookUp_ref->{$dateKey}->{Gold} = $Price;
          $lastDate = $datetime;
@@ -184,13 +185,13 @@ sub create_Daily_Commodity_Look_Up{
 
       my $dateKey =  $datetime->strftime("%Y-%m-%d");
 
-      # Need to convert to AUD but there maybe more Oil data than 
+      # Need to convert to AUD but there maybe more Oil data than
       # FX data so check.
       if (defined $$CurrencyLookUp_ref{$dateKey}->{USD}){
          $Value = $Value / $$CurrencyLookUp_ref{$dateKey}->{USD};
-         
 
-         #print $dateKey ." -> " . $Value . "\n"; 
+
+         #print $dateKey ." -> " . $Value . "\n";
          if ((!defined $lastDate) or (($datetime - $lastDate)/ONE_DAY) == 1) {
             $CommodityLookUp_ref->{$dateKey}->{Iron} = $Value;
             $lastDate = $datetime;
@@ -355,7 +356,7 @@ sub create_FXAUD_Look_Up{
    foreach my $row(@$FXAUD_ref) {
       my ($Date, $USD, $TWI, $CNY, $JPY, $EUR, $GBP) = @$row;
       #print "$Date\n";
-      
+
       # Scale the currencies to help the SVM.
       #$JPY = $JPY/100;
       #$CNY = $CNY/10;
@@ -412,7 +413,7 @@ sub create_FXAUD_Look_Up{
       my ($RawDateTime, $Currency, $Price) = @$row;
 
       #FIXME This is a hack.  The BitCoin day is off by a day.
-      #my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S"); 
+      #my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S");
       my $datetime1 = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S");
       #print "\ndatetime orig : $datetime1\n";
       my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S") + 86400;
@@ -430,7 +431,7 @@ sub create_FXAUD_Look_Up{
    }
 
    $sth2->finish();
-   $dbh->disconnect();   
+   $dbh->disconnect();
 
    return $FXAUDLookUp_ref;
 }
@@ -461,7 +462,7 @@ sub create_BTCAUD_Look_Up{
       my ($RawDateTime, $Currency, $Price) = @$row;
 
       #FIXME This is a hack.  The BitCoin day is off by a day.
-      #my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S"); 
+      #my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S");
       my $datetime1 = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S");
       #print "\ndatetime orig : $datetime1\n";
       my $datetime = Time::Piece->strptime($RawDateTime, "%Y-%m-%d %H:%M:%S") + 86400;
@@ -494,7 +495,7 @@ sub create_BTCAUD_Look_Up{
       #FIXME Need to fetch price.
       #$BTCAUDLookUp_ref->{(gmtime() - ONE_DAY)->strftime("%Y-%m-%d")} = $YESTERDAYS_BTC_PRICE;
    }
-      
+
    return $BTCAUDLookUp_ref;
 }
 
@@ -542,7 +543,7 @@ sub create_ASX200_Look_Up{
       $sth2->execute($Code);
 
       while (my @row = $sth2->fetchrow_array()) {
-         
+
          my $Date = $row[0];
          my $Open = $row[2];
          my $High = $row[3];
