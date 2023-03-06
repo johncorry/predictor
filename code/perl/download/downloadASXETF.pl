@@ -32,7 +32,7 @@ $sth->finish();
 #$start_date->parse("14 days ago");
 #$end_date->parse("Today");
 
-#
+# ETPMAG.ax - Silver
 # OOO.ax  - Oil
 # RCB.ax  - Bonds
 # BNKS.ax - Global banks
@@ -50,8 +50,9 @@ $sth->finish();
 # NDQ.ax  - NASDAQ
 # ^AXVI Only seems to be available for a day.
 
+my $numWeeks = 4;
 
-for (my $i = 4; $i >= 1; $i--) {
+for (my $i = $numWeeks; $i >= 1; $i--) {
 
    my $start = $i * 7 - 1;
    my $end = $start - 6;
@@ -59,7 +60,7 @@ for (my $i = 4; $i >= 1; $i--) {
 
    my $q = Finance::QuoteHist->new
       (
-         symbols    => [qw( ^AXVI OOO.ax RCB.ax BNKS.ax QCB.ax QAG.ax QAU.ax QOZ.ax QFN.ax QPON.ax QUAL.ax QUS.ax TECH.ax YANK.ax FOOD.ax NDQ.ax )],
+         symbols    => [qw( ETPMAG.ax ^AXVI OOO.ax RCB.ax BNKS.ax QCB.ax QAG.ax QAU.ax QOZ.ax QFN.ax QPON.ax QUAL.ax QUS.ax TECH.ax YANK.ax FOOD.ax NDQ.ax )],
          start_date => "$start days ago", # or '1 year ago', see Date::Manip
          end_date   => "$end days ago",
       );

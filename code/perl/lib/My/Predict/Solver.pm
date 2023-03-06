@@ -205,6 +205,7 @@ sub saveResult {
    print "Result  includeDaysMonths " . $self->{_problem}->getIncludeDaysMonths() . "\n";
    print "Result  includeTimeSeries " . $self->{_problem}->getIncludeTimeSeries() . "\n";
    print "Result includeFrequencies " . $self->{_problem}->getIncludeFrequencies() . "\n";
+   print "Result includeTrends " . $self->{_problem}->getIncludeTrends() . "\n";
 
    $dbh->do('REPLACE INTO Prediction
             (Date, Code, Period, UpperThreshold, LowerThreshold, TimeSeries, IncludeIndex, IncludeETFs, IncludeFX, IncludeDaysMonths, IncludeFrequencies, IncludeTimeSeries, Prediction, BestGain, SitAndHoldGain, Gain, Accuracy) 

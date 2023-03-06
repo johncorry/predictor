@@ -44,12 +44,14 @@ while (my @row = $sth->fetchrow_array()) {
    if ($code eq ""){
 	next;
    }
+  
+   print "$code\n";
 
    my %stockinfo = $q->fetch("australia", $code);
 
-   #while ( (my $k, my $v) = each %stockinfo ) {
-   #   print "$k => $v\n";
-   #}
+   while ( (my $k, my $v) = each %stockinfo ) {
+      print "$k => $v\n";
+   }
 
    
    if (!$stockinfo{$code,"open"}){

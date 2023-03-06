@@ -4,11 +4,14 @@ use strict;
 use warnings;
 
 use DBI;
-use Email::Send::SMTP::Gmail;
+use MIME::Lite;
+#use Time::Piece;
 use DateTime;
 use Date::Manip;
 
 use My::Predict::DB;
+#use My::Predict::Problem;
+#use My::Predict::Solver;
 use My::Predict::ASX200Data;
 
 
@@ -296,20 +299,30 @@ my $data = qq{
 
 
 my $subject   = "Predictions for $date_title";
-my $sender    = 'ASXpredictor@gmail.com';
+#my $sender    = 'ubuntu@ip-172-31-26-25.ap-southeast-2.compute.internal';
+my $sender    = 'predictor@thefuture.com';
 my $recipient = 'mrjohncorry@gmail.com';
+#my $recipient = 'john.corry@au.rlb.com';
+
+my $mime = MIME::Lite->new(
+    'From'    => $sender,
+    'To'      => $recipient,
+    'Subject' => $subject,
+    'Type'    => 'text/html',
+    'Data'    => $data,
+);
+
+$mime->send() or die "Failed to send mail\n";
+
+use Email::Send::SMTP::Gmail;
 
 my ($mail,$error)=Email::Send::SMTP::Gmail->new( -smtp=>'smtp.gmail.com',
-                                                 -login=>$sender,
+                                                 -login=>'ASXpredictor@gmail.com',
                                                  -pass=>'Withnail&1');
 
 
 print "session error: $error" unless ($mail!=-1);
 
-$mail->send(-to=>$recipient, 
-	    -subject=>$subject, 
-	    -body=>$data, 
-	    -contenttype=>'text/html');
+$mail->send(-to=>'mrjohncorry@gmail.com', -subject=>'Hello Once Again!', -body=>$data, -contenttype=>'text/html');
 
-$mail->bye;
- 
+$mail->bye; 

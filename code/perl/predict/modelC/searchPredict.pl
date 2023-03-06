@@ -29,6 +29,7 @@ my @includeFXValues = (1);
 my @includeDaysMonthsValues = (1);
 my @includeTimeSeriesValues = (1);
 my @includeFrequenciesValues = (1);
+my @includeTrendsValues = (0); # 1/3/2021 Switch this off as Google is blocking due to over calling.
 
 my $result = GetOptions ("c=s"  => \$code,
                          "fp=i" => \$forecastPeriod,
@@ -57,6 +58,7 @@ print "Result Searching....\n";
    foreach my $includeDaysMonths (@includeDaysMonthsValues){
    foreach my $includeTimeSeries (@includeTimeSeriesValues){
    foreach my $includeFrequencies (@includeFrequenciesValues){
+   foreach my $includeTrends (@includeTrendsValues){
 
       $problem->setUpperThreshold($upperThreshold);
       $problem->setLowerThreshold($lowerThreshold);
@@ -66,6 +68,7 @@ print "Result Searching....\n";
       $problem->includeDaysMonths($includeDaysMonths);
       $problem->includeTimeSeries($includeTimeSeries);
       $problem->includeFrequencies($includeFrequencies);
+      $problem->includeTrends($includeTrends);
 
       print "Result\nResult Trying to predict $code....\n";
       $problem->printParameters;
@@ -85,6 +88,7 @@ print "Result Searching....\n";
             $solver->saveResult;
          }
       }
+   }
    }
    }
    }

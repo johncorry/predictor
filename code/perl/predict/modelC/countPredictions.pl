@@ -15,7 +15,7 @@ print "\nResult Executing at $startLogTime\n\n";
 
 my $ASX200Data = new ASX200Data();
 
-my $codes_arr_ref = $ASX200Data->getCodes();
+my $codes_arr_ref = $ASX200Data->getValidCodes();
 my $counter = 0;
 my $predictable = 0;
 

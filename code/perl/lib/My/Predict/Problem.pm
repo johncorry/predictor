@@ -28,12 +28,14 @@ sub new
       _noiseCutoff        => 120,
       _timeSeries         => 10,
       _freqSeries         => 200,
-      _includeIndex       => 0,
+      _trendSeries        => 10,
+      _includeIndex       => 10,
       _includeETFs        => 0,
       _includeFX          => 0,
       _includeDaysMonths  => 0,
       _includeFrequencies => 0,
       _includeTimeSeries  => 0,
+      _includeTrends      => 0,
       _accuracy           => 0,
    };
 
@@ -66,6 +68,10 @@ sub new
    #      things down strem of this can't handle it.
    $self->{_ETFMap} = My::Predict::DataLookUp::create_Daily_ETF_Look_Up();
    print "Result done creating daily ETF look up\n";
+
+   print "Result creating daily Trend look up\n";
+   $self->{_trendMap} = My::Predict::DataLookUp::create_Weekly_Trend_Look_Up($self->{_code});
+   print "Result done creating daily Trend look up\n";
 
    $self->{_predictionMap} = {};
 
@@ -173,6 +179,7 @@ sub printParameters {
    print "Result  includeDaysMonths " . $self->getIncludeDaysMonths() . "\n";
    print "Result  includeTimeSeries " . $self->getIncludeTimeSeries() . "\n";
    print "Result includeFrequencies " . $self->getIncludeFrequencies() . "\n";
+   print "Result includeTrends " . $self->getIncludeTrends() . "\n";
 }
 
 sub getCode {
@@ -367,6 +374,16 @@ sub getIncludeTimeSeries {
    return $self->{_includeTimeSeries};
 }
 
+sub includeTrends {
+   my ( $self, $includeTrends ) = @_;
+   return $self->{_includeTrends} = $includeTrends;
+}
+
+sub getIncludeTrends {
+   my ( $self ) = @_;
+   return $self->{_includeTrends};
+}
+
 sub canPredict {
    my ( $self ) = @_;
 
@@ -464,6 +481,15 @@ sub createProblem {
          print "Result Including ETFs.\n";
          my $ETFsPDL = $self->createETFsPDL;
          $problemPDL = $problemPDL->glue(1,$ETFsPDL);
+      }
+
+      if($self->{_includeTrends}){
+         print "Result Including Trends.\n";
+         # 18/7/2020 Fill this bit in. Its just a cut and paste
+         #           Have you created _trendSeries?
+         #           Consider doing both a time series and freq 
+         my $trendsPDL = $self->createTrendsPDL;
+         $problemPDL = $problemPDL->glue(1,$trendsPDL);
       }
 
       if($self->{_includeDaysMonths}){
@@ -624,6 +650,16 @@ sub createFeaturePDL {
       my $freqSeriesPDL = $self->createFreqSeriesPDL($$pricePDLSet_ref->getScaledClosePDL(), $self->{_freqSeries});
       $dataPDL = $dataPDL->glue(1,$freqSeriesPDL);
    }
+
+   #if($self->{_includeTrends}){
+   #   print "Result Including Trends.\n";
+      # 18/7/2020 Fill this bit in. Its just a cut and paste
+      #           Have you created _trendSeries?
+      #           Consider doing both a time series and freq 
+      #my $trendSeriesPDL = $self->createFreqSeriesPDL($$pricePDLSet_ref->getScaledClosePDL(), $self->{_trendSeries});
+      #$dataPDL = $dataPDL->glue(1,$freqSeriesPDL);
+   #}
+
 
    my $mfiPDL = ta_mfi($$pricePDLSet_ref->getScaledHighPDL,
                        $$pricePDLSet_ref->getScaledLowPDL,
@@ -787,6 +823,18 @@ sub createFXPDL {
     #print "currancy_pdl scaled : ";
     #print $currancy_pdl . "\n";
 
+    #if($self->{_includeTimeSeries}){
+    #   print "Result Including TimeSeries.\n";
+    #   my $timeSeriesPDL = $self->createTimeSeriesPDL($currancy_pdl, $self->{_timeSeries});
+    #   $data_pdl = $data_pdl->glue(1,$timeSeriesPDL);
+    #}
+
+    #if($self->{_includeFrequencies}){
+    #   print "Result Including Frequencies.\n";
+    #   my $freqSeriesPDL = $self->createFreqSeriesPDL($currancy_pdl, $self->{_freqSeries});
+    #   $data_pdl = $data_pdl->glue(1,$freqSeriesPDL);
+    #}
+
     my $sma_pdl = $self->pdl_sma($currancy_pdl,@time_frames);
     $data_pdl = $data_pdl->glue(1,$sma_pdl);
     #print "Result SMA pdl : " . $sma_pdl . "\n";
@@ -811,6 +859,7 @@ sub createETFsPDL {
 
   my @time_frames = (2,5,10,20,50,100,200);
   my @ETFs = ("OOO","QAG","QCB","RCB","QAU","QFN","QOZ","QUAL","NDQ","^AXVI");
+  #my @ETFs = ("OOO","QAG","QCB","RCB","QAU","QFN","QOZ","QUAL","NDQ");
   #my @ETFs = ("GOLD","QCB","OOO","IAA","IVV","IOO","IXI","IAF","VLC");
   my $data_pdl = pdl[];
 
@@ -847,6 +896,18 @@ sub createETFsPDL {
     #print "ETF_pdl scaled : ";
     #print $ETF_pdl . "\n";
 
+    #if($self->{_includeTimeSeries}){
+    #   print "Result Including TimeSeries.\n";
+    #   my $timeSeriesPDL = $self->createTimeSeriesPDL($ETF_pdl, $self->{_timeSeries});
+    #   $data_pdl = $data_pdl->glue(1,$timeSeriesPDL);
+    #}
+
+    #if($self->{_includeFrequencies}){
+    #   print "Result Including Frequencies.\n";
+    #   my $freqSeriesPDL = $self->createFreqSeriesPDL($ETF_pdl, $self->{_freqSeries});
+    #   $data_pdl = $data_pdl->glue(1,$freqSeriesPDL);
+    #}
+
     my $sma_pdl = $self->pdl_sma($ETF_pdl,@time_frames);
     $data_pdl = $data_pdl->glue(1,$sma_pdl);
     #print "Result SMA pdl : " . $sma_pdl . "\n";
@@ -865,7 +926,77 @@ sub createETFsPDL {
   return $data_pdl;
 }
 
+sub createTrendsPDL {
 
+  my ( $self ) = @_;
+
+  my @time_frames = (2,5,10,20,50,100,200);
+  #my @time_frames = (10,20,50,100);
+  my $data_pdl = pdl[];
+
+  my @trend = ();
+  my $prev = 0;
+
+  print "Result Adding trends features.\n";
+
+  foreach my $dateKey (@{$self->{_dateSeries}}) {
+    #print " ++++ " . $dateKey . " " . $self->{_trendMap}->{$dateKey} . "\n";
+
+    if (!defined $self->{_trendMap}->{$dateKey}){
+      print "Result $dateKey NOT DEFINED so using previous.\n";
+      #print "Result ++++ " . $$self->{_trendMap}->{$dateKey} . "\n";       
+      push @trend, $prev;
+    }
+    else{
+      #print $dateKey . " " . $self->{_trendMap}->{$dateKey} . "\n";
+      push @trend, $self->{_trendMap}->{$dateKey};
+      $prev = $self->{_trendMap}->{$dateKey};
+    }
+  }
+
+  #print @trend . "  -> " . $trend[1] . "\n";
+
+  # I do not actually include the scaled series in the feature set. Should I?
+  my $trend_pdl = pdl(@trend);
+
+  #print "trend_pdl : ";
+  #print $trend_pdl . "\n";
+
+  my $maxPrice = max($trend_pdl);
+  $self->scale(\$trend_pdl,$maxPrice);
+
+  #print "trend_pdl scaled : ";
+  #print $trend_pdl . "\n";
+
+  if($self->{_includeTimeSeries}){
+     print "Result Including TimeSeries.\n";
+     my $timeSeriesPDL = $self->createTimeSeriesPDL($trend_pdl, $self->{_timeSeries});
+     $data_pdl = $data_pdl->glue(1,$timeSeriesPDL);
+  }
+
+  if($self->{_includeFrequencies}){
+     print "Result Including Frequencies.\n";
+     my $freqSeriesPDL = $self->createFreqSeriesPDL($trend_pdl, $self->{_freqSeries});
+     $data_pdl = $data_pdl->glue(1,$freqSeriesPDL);
+  }
+
+
+  my $sma_pdl = $self->pdl_sma($trend_pdl,@time_frames);
+  $data_pdl = $data_pdl->glue(1,$sma_pdl);
+  #print "Result SMA pdl : " . $sma_pdl . "\n";
+  #print "Result datapdl : " . $data_pdl . "\n";
+
+  #my $roc_pdl = $self->pdl_roc($trend_pdl,@time_frames);
+  #$data_pdl = $data_pdl->glue(1,$roc_pdl);
+
+  my $linearreg_pdl = $self->pdl_linearreg($trend_pdl,@time_frames);
+  $data_pdl = $data_pdl->glue(1,$linearreg_pdl);
+
+  #print $data_pdl;
+  #exit;
+
+  return $data_pdl;
+}
 
 sub createDaysMonthsPDL {
 

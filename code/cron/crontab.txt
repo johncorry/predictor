@@ -18,7 +18,6 @@
 # This is just after the ASX has closed.
 00 07  * * 1-5 export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/downloadASX200Data.pl >> /home/ec2-user/logs/downloadASX200Data.log 2>&1
 
-
 #30 14  * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/downloadASX200Data_new.pl >> /home/ec2-user/logs/downloadASX200Data_new.log 2>&1
 
 # Clean historic ASX data. Loaded once a week as a back up to the daily download.
@@ -27,12 +26,17 @@
 # This is just after the ASX has closed.
 00 07  * * 1-5 export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/downloadASXETF.pl >> /home/ec2-user/logs/downloadASXETF.log 2>&1
 
+00 01  * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/downloadDailyTrends.pl >> /home/ec2-user/logs/downloadDailyTrends.log 2>&1
+
+00 01 * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/downloadWeeklyTrends.pl >> /home/ec2-user/logs/downloadWeeklyTrends.log 2>&1
+
+00 04 * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/perl /home/ec2-user/git-checkout/code/perl/download/updateASXCompanyNames.pl >> /home/ec2-user/logs/updateASXCompanyNames.log 2>&1
+
 ####### 
 
-* * * * * /usr/bin/killall --older-than 60m predict_solver.pl >> /dev/null 2>&1
-* * * * * /usr/bin/killall --older-than 60m searchPredict.pl >> /dev/null 2>&1
+* * * * * /usr/bin/killall --older-than 120m predict_solver.pl >> /dev/null 2>&1
+* * * * * /usr/bin/killall --older-than 120m searchPredict.pl >> /dev/null 2>&1
 * * * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /usr/bin/pgrep batchPredict.pl >> /dev/null 2>&1 ; [ $? != 0 ] && /home/ec2-user/git-checkout/code/perl/predict/modelC/batchPredict.pl >> /home/ec2-user/logs/batchPredict.out 2>&1
 00 17 * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /home/ec2-user/git-checkout/code/perl/predict/modelC/portfolioPredict.pl  
 30 20 * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /home/ec2-user/git-checkout/code/perl/predict/modelC/mail.pl 
 30 20 * * * export PERL5LIB=/home/ec2-user/git-checkout/code/perl/lib; /home/ec2-user/git-checkout/code/perl/predict/modelC/testDataSources.pl | /bin/mail -s "Test Data" mrjohncorry@gmail.com
-

@@ -13,7 +13,85 @@ use base 'Exporter';
 our @EXPORT_OK = qw(create_Daily_ETF_Look_Up create_Daily_Commodity_Look_Up create_WB_Commodity_Look_Up create_FXAUD_Look_Up create_BTCAUD_Look_Up create_ASX200_Look_Up);
 
 our $EARLIEST_BTC_PRICE = "2010-07-18";
-our $EARLIEST_ASX_PRICE = "2015-06-24";
+our $EARLIEST_ASX_PRICE = "2016-06-24";
+#our $EARLIEST_ASX_PRICE = "2015-06-24";
+
+sub create_Weekly_Trend_Look_Up{
+
+  my ( $code ) = @_;
+
+  # Open DB connection.
+   my $dbh = DBI->connect(
+       $My::Predict::DB::Location,
+       $My::Predict::DB::User,
+       $My::Predict::DB::Pass,
+       { RaiseError => 0, PrintError => 1 },
+   ) or die $DBI::errstr;
+
+   my $TrendLookUp_ref = {};
+   my $lastDate;
+   my $lastTrend = 0;
+      
+   my $sth = $dbh->prepare("SELECT Date, Trend FROM PriceData.ASXTrend WHERE Series = 'Weekly' AND Code = ?");
+
+   $sth->execute($code);
+   my $Trend_ref = $sth->fetchall_arrayref();
+
+   foreach my $row(@$Trend_ref) {
+      my ($Date, $Trend) = @$row;
+
+      #print "$code $Date $Trend\n";
+      my $datetime = Time::Piece->strptime($Date,
+                                          "%Y-%m-%d %H:%M:%S");
+ 
+      my $dateKey =  $datetime->strftime("%Y-%m-%d");
+
+      #print $dateKey ." -> " . $Trend . "\n";
+      if ((!defined $lastDate) or (($datetime - $lastDate)/ONE_DAY) == 1) {
+         $TrendLookUp_ref->{$dateKey} = $Trend;
+         $lastDate = $datetime;
+         #print $dateKey ." ->> " . $Trend . "\n";
+         #print $TrendLookUp_ref->{$dateKey} . "\n";
+      }
+      else {
+         my $numDaysDiff = ($datetime - $lastDate)/ONE_DAY;
+         #print "|-> $numDaysDiff\n";
+         # Need to apply a linear interpolation here.
+         for (my $d = 1; $d <= $numDaysDiff; $d++){
+            my $dateKeyItr = ($lastDate + (ONE_DAY * $d))->strftime("%Y-%m-%d");
+            my $interpolatedTrend = $lastTrend + ((($Trend - $lastTrend)/$numDaysDiff)*$d);
+            #print " -> $dateKeyItr => $interpolatedTrend\n";
+            $TrendLookUp_ref->{$dateKeyItr} = $interpolatedTrend;
+         }
+         $lastDate = $datetime;
+         $lastTrend = $Trend;
+      }
+
+      $sth->finish();
+   }
+
+   $dbh->disconnect();
+
+   # Populate the remainder until today with interpolation
+   # Insert that logic here.
+   #print "Last date: -> " . $lastDate . "\n";
+   #print "Interpolate the rest\n"; 
+   my $today = localtime;
+   
+   my $numDaysDiff = ($today - $lastDate)/ONE_DAY;
+   #print "-> $numDaysDiff\n";
+   for (my $d = 1; $d <= $numDaysDiff; $d++){ 
+      my $dateKeyItr = ($lastDate + (ONE_DAY * $d))->strftime("%Y-%m-%d");
+      #print "$dateKeyItr\n";
+      my $interpolatedTrend = $lastTrend - ((($lastTrend)/$numDaysDiff)*$d);
+      #print " -> $dateKeyItr => $interpolatedTrend\n";
+      $TrendLookUp_ref->{$dateKeyItr} = $interpolatedTrend; 
+   }
+
+   return $TrendLookUp_ref;
+}
+
+
 
 sub create_Daily_ETF_Look_Up{
 
@@ -27,12 +105,14 @@ sub create_Daily_ETF_Look_Up{
 
    my $ETFLookUp_ref = {};
    my $lastDate;
+   my $lastPrice;
 
    my @codes = ("OOO",   # Oil
                 "QAG",   # Agriculture
                 "QCB",   # Broad commodities
                 "RCB",   # Bonds
                 "QAU",   # Gold
+                "ETPMAG",# Silver
                 "QFN",   # Financials
                 "QOZ",   # FTSE RAFI Aust 200
                 "QUAL",  # MSCI World ex Australian Quality Index
@@ -75,6 +155,7 @@ sub create_Daily_ETF_Look_Up{
                $ETFLookUp_ref->{$dateKeyItr}->{$code} = $Price;
             }
             $lastDate = $datetime;
+            $lastPrice = $Price;
          }
       }
 
@@ -103,6 +184,7 @@ sub create_Daily_Commodity_Look_Up{
 
    my $CommodityLookUp_ref = {};
    my $lastDate;
+   my $lastValue;
 
    my $CurrencyLookUp_ref = create_FXAUD_Look_Up();
 
@@ -136,6 +218,7 @@ sub create_Daily_Commodity_Look_Up{
                $CommodityLookUp_ref->{$dateKeyItr}->{Oil} = $Value;
             }
          $lastDate = $datetime;
+         $lastValue = $Value;
          }
       }
    }
@@ -143,6 +226,8 @@ sub create_Daily_Commodity_Look_Up{
    $sth = $dbh->prepare("SELECT Date, Close FROM ASX200Price WHERE Code = 'GOLD'");
    $sth->execute();
    $Commodity_ref = $sth->fetchall_arrayref();
+
+   my $lastPrice;
 
    foreach my $row(@$Commodity_ref) {
       my ($Date, $Price) = @$row;
@@ -170,6 +255,7 @@ sub create_Daily_Commodity_Look_Up{
             $CommodityLookUp_ref->{$dateKeyItr}->{Gold} = $Price;
          }
         $lastDate = $datetime;
+        $lastPrice = $Price;
       }
    }
 
@@ -208,6 +294,7 @@ sub create_Daily_Commodity_Look_Up{
                $CommodityLookUp_ref->{$dateKeyItr}->{Iron} = $Value;
             }
          $lastDate = $datetime;
+         $lastValue = $Value;
          }
       }
    }
@@ -387,6 +474,7 @@ sub create_FXAUD_Look_Up{
          my $numDaysDiff = ($datetime - $lastDate)/ONE_DAY;
          #print " -> $numDaysDiff\n";
          # Need to apply a linear interpolation here.
+         # Look and see how it is done above in the WB look up.
          for (my $d = 1; $d <= $numDaysDiff; $d++){
             my $dateKeyItr = ($lastDate + (ONE_DAY * $d))->strftime("%Y-%m-%d");
             #print " -> $dateKeyItr\n";

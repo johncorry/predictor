@@ -5,6 +5,7 @@ package ASX200Data;
 use DBI;
 use Time::Piece;
 use Time::Seconds;
+use Date::Manip;
 
 use My::Predict::DB;
 use My::Predict::Price;
@@ -28,7 +29,7 @@ sub getStartDate {
    if (exists $self->{_startDate}) {
    }
    else {
-      $self->{_startDate} = "2015-06-24";
+      $self->{_startDate} = "2016-06-24";
    }
 
    return $self->{_startDate};
@@ -127,6 +128,43 @@ sub getCodes {
          push $self->{_codes}, $row[0];
       }
    } 
+
+   return $self->{_codes};
+}
+
+sub getValidCodes {
+   my ($self) = @_;
+
+   if (exists $self->{_codes}){
+   }
+   else {
+
+      $self->{_codes} = [];
+
+      # Open DB connection.
+      my $dbh = DBI->connect(
+        $My::Predict::DB::Location,
+        $My::Predict::DB::User,
+        $My::Predict::DB::Pass,
+        { RaiseError => 0, PrintError => 1 },
+      ) or die $DBI::errstr;
+
+      my $sth = $dbh->prepare("SELECT * FROM PriceData.ASX200Company 
+                                WHERE LastDate > ?
+                                AND Sector <> ?");
+
+      my $date = new Date::Manip::Date;
+      $date->parse("14 days ago");
+      my $date_str = $date->printf("%Y-%m-%d");
+
+      #print $date_str . "\n";
+
+      $sth->execute($date_str,"Not Applic") or die $DBI::errstr;
+
+      while (my @row = $sth->fetchrow_array()) {
+         push $self->{_codes}, $row[0];
+      }
+   }
 
    return $self->{_codes};
 }
