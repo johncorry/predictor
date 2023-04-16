@@ -13,7 +13,7 @@ use Date::Manip;
 use My::Predict::DB;
 
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
-my $extractLocation = '/home/ec2-user/data/ASX200/';
+my $extractLocation = '/home/jcorry/data/ASX200/';
 
 my $logtime = localtime; # scalar context
 print "\nExecuting at $logtime\n\n";

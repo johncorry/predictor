@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# Make sure that when you call this from the cron job that you don't do so on a Sat or Sun as I will insert records for those days.
-
 use strict;
 use warnings;
 use File::Fetch;
@@ -9,7 +7,7 @@ use DBI;
 use Time::Piece;
 use DateTime;
 use Date::Manip;
-use Finance::Quote; # This module was broken for the ASX so I had to patch it.
+use Finance::Quote; 
 #use String::Util qw(trim);
 
 use My::Predict::DB;
@@ -26,11 +24,6 @@ my $dbh = DBI->connect(
     $My::Predict::DB::Pass,
     { RaiseError => 0, PrintError => 0 },
 ) or die $DBI::errstr;
-
-my $date_obj = new Date::Manip::Date;
-$date_obj->parse("Today");
-my $date = $date_obj->printf('%Y-%m-%d');
-print $date ."\n";
 
 my $sth = $dbh->prepare("SELECT Code FROM PriceData.ASX200Company WHERE Sector <> ?");
       $sth->execute("Not Applic");
@@ -49,14 +42,19 @@ while (my @row = $sth->fetchrow_array()) {
 
    my %stockinfo = $q->fetch("australia", $code);
 
-   while ( (my $k, my $v) = each %stockinfo ) {
-      print "$k => $v\n";
-   }
+   #while ( (my $k, my $v) = each %stockinfo ) {
+   #   print "$k => $v\n";
+   #}
 
    
    if (!$stockinfo{$code,"open"}){
         next;
    }
+
+   my $stockdate = trim $stockinfo{$code,"date"};
+   my $date_obj = new Date::Manip::Date;
+   $date_obj->parse($stockdate);
+   my $date = $date_obj->printf('%Y-%m-%d');
 
    my $open =  trim $stockinfo{$code,"open"};
    my $high =  trim $stockinfo{$code,"high"};
@@ -64,6 +62,7 @@ while (my @row = $sth->fetchrow_array()) {
    my $close =  trim $stockinfo{$code,"last"};
    my $volume =  trim $stockinfo{$code,"volume"};
  
+   #print "The date of $code is ". $date ."\n";
    #print "The close of $code is ". $close ."\n";   
    #print "The open of  $code is ". $open ."\n";
    #print "The high of  $code is ". $high ."\n";
@@ -73,7 +72,7 @@ while (my @row = $sth->fetchrow_array()) {
    print "Inserting data for ". $date . " for ". $code . " " . $close . "\n";
             
    my $sth2 = $dbh->prepare("INSERT INTO ASX200Price
-                             (Date,Code,Open,High,Low,Close,Volume) 
+                             (Date,Code,Open,High,Low,Close,AdjClose,Volume) 
                              values 
                              ('$date',
                               '$code',
@@ -81,6 +80,7 @@ while (my @row = $sth->fetchrow_array()) {
                               '$high',
                               '$low',
                               '$close',
+			      0,
                               '$volume')
                              ON DUPLICATE KEY UPDATE
                               Open='$open',

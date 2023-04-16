@@ -63,7 +63,7 @@ while (my @row = $sth->fetchrow_array()) {
    print $code . " " . $name . "\n";
    print $company_name . "\n";
 
-   open(my $cmd, '-|', '/home/ec2-user/git-checkout/code/perl/download/trend_weekly.py', $company_name) or die $!;
+   open(my $cmd, '-|', '/home/jcorry/git-checkout/code/perl/download/trend_weekly.py', $company_name) or die $!;
    while (my $line = <$cmd>) {
 
      my @tokens = split(/ /, $line);

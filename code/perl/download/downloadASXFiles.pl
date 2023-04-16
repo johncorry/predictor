@@ -16,7 +16,7 @@ use WWW::Mechanize;
 my $logtime = localtime; # scalar context
 print "\nExecuting at $logtime\n\n";
 
-my $extractLocation = '/home/ec2-user/data/ASX200/archive';
+my $extractLocation = '/home/jcorry/data/ASX200/archive';
 my $zipLocation = "$extractLocation/zip";
 my $base_url = "https://www.asxhistoricaldata.com/data/week";
 my $numWeeks = 5;

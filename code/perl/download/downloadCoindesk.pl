@@ -16,7 +16,7 @@ print "\nExecuting at $logtime\n\n";
 my $startDate = ''; # In the form 'YYYY-MM-DD'
 my $endDate = ''; 
 
-my $downloadDir = '/home/ec2-user/data/BTC/CoinDesk/';
+my $downloadDir = '/home/jcorry/data/BTC/CoinDesk/';
 
 my $result = GetOptions ("start=s" => \$startDate,    
                          "end=s"   => \$endDate,

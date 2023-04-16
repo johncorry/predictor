@@ -14,7 +14,7 @@ my $logtime = localtime; # scalar context
 print "\nExecuting at $logtime\n\n";
 my $rootUrl = "http://www.asx.com.au/asx/research/";
 my $filename = "ASXListedCompanies.csv";
-my $extractLocation = '/home/ec2-user/data/ASX200/';
+my $extractLocation = '/home/jcorry/data/ASX200/';
 
 my $url = $rootUrl . $filename;
 
@@ -47,30 +47,39 @@ while ( my $line = <$fh>){
   # Ignore the header.
   if ($count > 3)
   {
-    #print "$line \n";
+    #print "\n$line \n";
     
     # Tokenise the CSV
-    my @values = split(/"/,$line);
+    my @values = split(/\,/,$line);
 
-    #print "\n\n";
-    #print "Size = @values\n";
+    #print "\n0 -> " . "$values[0]\n";
+    #print "1 -> " . "$values[1]\n";
+    #print "2 -> " . "$values[2]\n";
 
-    chop($values[2]);
-    my $temp = reverse($values[2]);
-    chop($temp);
-    $values[2] = reverse($temp);
+    my $name = $values[0];
+    $name =~ s/\'//g; # remove any single quotes
+    $name =~ s/\"//g;
+    my $code = $values[1];
+    $code =~ s/\"//g;
+    my $sector = $values[2];
+    $sector =~ s/\"//g;
 
-    #print "$values[1]\n";
-    #print "$values[2]\n";
-    #print "$values[3]\n";
+    #print "Code   " . $code . "\n";
+    #print "Name   " . $name . "\n"; 
+    #print "Sector " . $sector . "\n";
 
     $sth = $dbh->prepare("INSERT INTO ASX200Company
-                         (Code,Name,Sector) 
-                         values 
-                         ('$values[2]', 
-                          '$values[1]', 
-                          '$values[3]')");
-    $sth->execute();
+                         (Code,Name,Sector)
+                          values
+                          ('$code',
+                           '$name',
+                           '$sector')
+                          ON DUPLICATE KEY UPDATE
+                          Name = '$name',
+                          Sector = '$sector'");
+
+    $sth->execute()
+      or die "Error inserting record: " . $dbh->errstr;
   }
 }
  

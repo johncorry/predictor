@@ -13,7 +13,7 @@ print "\nExecuting at $logtime\n\n";
 
 my $rootUrl = "http://www.rba.gov.au/statistics/tables/csv/";
 my $filename = "f11.1-data.csv";
-my $extractLocation = '/home/ec2-user/data/Currency/RBA/';
+my $extractLocation = '/home/jcorry/data/Currency/RBA/';
 
 my $url = $rootUrl . $filename;
 

@@ -14,7 +14,7 @@ print "\nExecuting at $logtime\n\n";
 
 my $rootUrl = "https://www.quandl.com/api/v3/datasets/OPEC/ORB.csv?api_key=F5SS-7j_5kBnqn6EsRCX";
 my $filename = "OPEC-ORB.csv";
-my $extractLocation = '/home/ec2-user/data/Commodity/quandl/';
+my $extractLocation = '/home/jcorry/data/Commodity/quandl/';
 
 my $url = $rootUrl;
 print $url . "\n";
